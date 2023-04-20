@@ -36,7 +36,6 @@ final class ConnectionPool implements ConnectionPoolInterface
         private readonly ?int $connectionTtl = null,
         private readonly ?int $connectionUseLimit = null
     ) {
-        var_dump(__METHOD__);
         if ($this->size < 0) {
             throw new DriverConfigurationException('Expected, connection pull size > 0');
         }
@@ -46,7 +45,6 @@ final class ConnectionPool implements ConnectionPoolInterface
         $this->map = new WeakMap();
 
         $this->event(new PoolCreated($this));
-//        var_dump('Pool Event: PgConn Pool created');
     }
 
     /** @psalm-return array{PostgreSQL|null, ConnectionStats|null } */
@@ -62,10 +60,6 @@ final class ConnectionPool implements ConnectionPoolInterface
         if (!$connection instanceof PostgreSQL) {
             return [null, null];
         }
-
-//        var_dump('Pool Event: get PgConn');
-//        var_dump('Pool Event: capacity: ' . $this->capacity());
-//        var_dump('Pool Event: length: ' . $this->length());
 
         $this->event(
             new PoolConnectionObtaining($this->capacity(), $this->length(), $this->stats())
@@ -84,8 +78,6 @@ final class ConnectionPool implements ConnectionPoolInterface
 
         $this->event(new PoolEvent('A Connection is putting into the Pool'));
 
-//        var_dump('Pool Event: put PgConn into Pool');
-
         if ($stats === null || $stats->isOverdue()) {
             $this->remove($connection);
 
@@ -103,7 +95,6 @@ final class ConnectionPool implements ConnectionPoolInterface
 
             return;
         }
-        // var_dump('Вернули Conn в pool');
     }
 
     public function close(): void
@@ -113,7 +104,6 @@ final class ConnectionPool implements ConnectionPoolInterface
         $this->event(new PoolClosed());
 
         gc_collect_cycles();
-//        var_dump('Pool Event: close');
     }
 
     public function capacity(): int
@@ -154,9 +144,6 @@ final class ConnectionPool implements ConnectionPoolInterface
         $this->map->offsetUnset($connection);
         unset($connection);
 
-//        var_dump('Pool Event: remove PgConn from Pool');
-//        var_dump('Pool Event: capacity: ' . $this->capacity());
-//        var_dump('Pool Event: length: ' . $this->length());
         $this->event(new PoolConnectionRemoved($this->capacity(), $this->length()));
     }
 

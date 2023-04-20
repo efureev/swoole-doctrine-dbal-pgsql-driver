@@ -12,7 +12,6 @@ class ConnectionPoolFactory implements ConnectionPoolFactoryInterface
 {
     public function __construct(private ?EventDispatcherInterface $dispatcher = null)
     {
-        var_dump(__METHOD__);
     }
 
     /**

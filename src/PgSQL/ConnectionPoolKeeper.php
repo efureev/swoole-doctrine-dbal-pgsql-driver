@@ -8,11 +8,6 @@ final class ConnectionPoolKeeper
 {
     private ?ConnectionPoolInterface $pool = null;
 
-    public function __construct()
-    {
-        var_dump(__METHOD__);
-    }
-
     public function isEmpty(): bool
     {
         return $this->pool === null;

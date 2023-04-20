@@ -17,11 +17,6 @@ final class Driver extends AbstractPostgreSQLDriver
     private ConnectionPoolFactoryInterface $poolFactory;
     private ConnectionPoolKeeper $poolKeeper;
 
-    public function __construct()
-    {
-        var_dump(__METHOD__);
-    }
-
     public function setPoolKeeper(ConnectionPoolKeeper $keeper): void
     {
         $this->poolKeeper = $keeper;
@@ -84,8 +79,6 @@ final class Driver extends AbstractPostgreSQLDriver
         if (!$pgsql->connect($dsn)) {
             throw new ConnectionException(sprintf('Failed to connect: %s', ($pgsql->error ?? 'Unknown')));
         }
-
-        // var_dump('Pool Event: create conn: PostgreSQL');
 
         return $pgsql;
     }
