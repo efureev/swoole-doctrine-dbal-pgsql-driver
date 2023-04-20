@@ -2,6 +2,12 @@
   "name": "efureev/swoole-doctrine-dbal-pgsql-driver",
   "description": "The Postgres Swoole 5 driver for Doctrine",
   "license": "MIT",
+  "keywords": [
+    "symfony",
+    "swoole",
+    "docrtine",
+    "dbal"
+  ],
   "authors": [
     {
       "name": "Fureev Eugene",
