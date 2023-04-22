@@ -10,7 +10,6 @@ use Doctrine\DBAL\ParameterType;
 use Swoole\Coroutine\PostgreSQL;
 use Swoole\Coroutine\PostgreSQLStatement;
 use Swoole\Packages\Doctrine\DBAL\PgSQL\Exception\DriverException as SwooleDriverException;
-
 use function is_array;
 use function is_bool;
 
@@ -23,7 +22,7 @@ final class Statement implements StatementInterface
     {
         $stmt = $this->connection->prepare($sql);
 
-        if (!$stmt) {
+        if ($stmt === false) {
             throw SwooleDriverException::fromConnection($this->connection);
         }
 

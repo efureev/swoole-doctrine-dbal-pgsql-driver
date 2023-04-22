@@ -10,25 +10,20 @@ use Swoole\Coroutine\Context;
 use Swoole\Coroutine\PostgreSQL;
 use Swoole\Packages\Doctrine\DBAL\PgSQL\Exception\ConnectionException;
 use Swoole\Packages\Doctrine\DBAL\PgSQL\Exception\DriverException;
+use Swoole\Packages\Doctrine\DBAL\PgSQL\Exception\PingException;
 use Throwable;
-
 use function defer;
 use function time;
-use function trim;
 
 final class Connection extends ConnectionDirect
 {
     public function __construct(
         private ConnectionPoolInterface $pool,
-        private int $retryDelay,
-        private int $maxAttempts,
-        private int $connectionDelay,
-//        ?Closure $connectionFactory = null,
+        private int                     $retryDelay,
+        private int                     $maxAttempts,
+        private int                     $connectionDelay,
     )
     {
-//        if ($connectionFactory !== null) {
-//            parent::__construct($connectionFactory);
-//        }
     }
 
     public function getNativeConnection(): PostgreSQL
@@ -60,29 +55,22 @@ final class Connection extends ConnectionDirect
                     if (!$stats instanceof ConnectionStats) {
                         throw new DriverException('Provided connect is corrupted');
                     }
-                    /** @var resource|bool $query */
-                    $query = $connection->query('SELECT 1');
+                    $this->ping($connection);
 
-                    // @todo here changes
-                    $affectedRows = match (true) {
-                        $query instanceof Co\PostgreSQLStatement => $query->affectedRows(),
-//                        is_resource($query) => (int)$connection->affectedRows($query),
-                        default => 0,
-                    };
-
-                    if ($affectedRows !== 1) {
-                        $errCode = trim((string)$connection->errCode);
-                        throw new ConnectionException(
-                            "Connection ping failed. Trying reconnect (attempt $i). Reason: $errCode"
-                        );
-                    }
                     $context[self::class] = [$connection, $stats];
 
                     /** @psalm-suppress UnusedFunctionCall */
                     defer($this->onDefer(...));
 
                     break;
-//                try {
+                } catch (PingException) {
+                    $errCode = (string)$connection->errCode;
+                    $lastException = new ConnectionException(
+                        "Connection ping failed. Trying reconnect (attempt $i). Reason: $errCode"
+                    );
+                    $connection = null;
+
+                    usleep($this->retryDelay);  // Sleep mсs after failure
                 } catch (Throwable $e) {
                     $errCode = '';
                     if ($connection instanceof PostgreSQL) {
@@ -93,8 +81,8 @@ final class Connection extends ConnectionDirect
                         ? $e
                         : new ConnectionException($e->getMessage(), (string)$errCode, '', (int)$e->getCode(), $e);
 
-                    usleep($this->retryDelay);
-//                    Co::usleep($this->retryDelay * 1000);  // Sleep mсs after failure
+                    // usleep($this->retryDelay);
+                    break;
                 }
             }
 

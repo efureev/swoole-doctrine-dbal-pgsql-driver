@@ -10,8 +10,8 @@ use Doctrine\DBAL\ParameterType;
 use Swoole\Coroutine\PostgreSQL;
 use Swoole\Packages\Doctrine\DBAL\PgSQL\Exception\ConnectionException;
 use Swoole\Packages\Doctrine\DBAL\PgSQL\Exception\DriverException;
+use Swoole\Packages\Doctrine\DBAL\PgSQL\Exception\PingException;
 use Swoole\Packages\Doctrine\DBAL\SQLParserUtils;
-
 use function strlen;
 use function substr;
 
@@ -104,7 +104,7 @@ class ConnectionDirect implements ConnectionInterface
             $stats->counterInc();
         }
 
-        if (!$stmt) {
+        if (!$stmt->execute()) {
             throw ConnectionException::fromConnection($pgConn);
         }
 
@@ -178,5 +178,18 @@ class ConnectionDirect implements ConnectionInterface
 //            throw new DriverConfigurationException('Missing Connection factory in: ' . static::class);
 //        }
         return ($this->connectionFactory)();
+    }
+
+    /**
+     * @throws PingException
+     */
+    public function ping(PostgreSQL $connection): void
+    {
+        $stmt = $connection->query('SELECT 1');
+        $affectedRows = $stmt !== false ? $stmt->affectedRows() : 0;
+
+        if ($affectedRows !== 1) {
+            throw new PingException();
+        }
     }
 }

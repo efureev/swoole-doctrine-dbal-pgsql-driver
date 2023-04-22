@@ -7,26 +7,34 @@ namespace Swoole\Packages\Doctrine\DBAL\PgSQL;
 use Doctrine\DBAL\Driver\Result as ResultInterface;
 use Swoole\Coroutine\PostgreSQL;
 use Swoole\Coroutine\PostgreSQLStatement;
-
+use Swoole\Packages\Doctrine\DBAL\PgSQL\Exception\DriverException;
 use function count;
 use function is_array;
 
 class Result implements ResultInterface
 {
-    public function __construct(private PostgreSQL $connection, private ?PostgreSQLStatement $result = null)
+    public function __construct(private PostgreSQL $connection, private ?PostgreSQLStatement $stmt = null)
     {
     }
 
     /** {@inheritdoc} */
     public function fetchNumeric(): array|bool
     {
-        return $this->result->fetchArray(null, SW_PGSQL_NUM);
+        if ($this->stmt === null) {
+            throw DriverException::fromConnection($this->connection);
+        }
+
+        return $this->stmt->fetchArray(null, SW_PGSQL_NUM);
     }
 
     /** {@inheritdoc} */
     public function fetchAssociative(): array|bool
     {
-        $result = $this->result->fetchAssoc();
+        if ($this->stmt === null) {
+            throw DriverException::fromConnection($this->connection);
+        }
+
+        $result = $this->stmt->fetchAssoc();
 
         if (is_array($result) && count($result) === 0) {
             $result = false;
@@ -83,18 +91,26 @@ class Result implements ResultInterface
     /** {@inheritdoc} */
     public function rowCount(): int
     {
-        return $this->result->affectedRows();
+        if ($this->stmt === null) {
+            throw DriverException::fromConnection($this->connection);
+        }
+
+        return $this->stmt->affectedRows();
     }
 
     /** {@inheritdoc} */
     public function columnCount(): int
     {
-        return $this->result->fieldCount();
+        if ($this->stmt === null) {
+            throw DriverException::fromConnection($this->connection);
+        }
+
+        return $this->stmt->fieldCount();
     }
 
     /** {@inheritdoc} */
     public function free(): void
     {
-        $this->result = null;
+        $this->stmt = null;
     }
 }

@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Swoole\Packages\Doctrine\DBAL\PgSQL;
 
-use Assert\Assertion;
 use BadMethodCallException;
 use Doctrine\DBAL\Connection;
-
 use function in_array;
 use function sprintf;
 use function uniqid;
@@ -36,13 +34,13 @@ class Cursor
      */
     public function __construct(
         private Connection $connection,
-        private string $sql,
-        private array $params = [],
-        private array $paramsTypes = [],
-        private bool $withHold = false,
-    ) {
+        private string     $sql,
+        private array      $params = [],
+        private array      $paramsTypes = [],
+        private bool       $withHold = false,
+    )
+    {
         $this->cursorName = $this->connection->quoteIdentifier(uniqid('cursor_'));
-        Assertion::isInstanceOf($this->connection->getDriver(), Driver::class);
     }
 
     public function getQuery(int $count = 1, string $direction = self::DIRECTION_FORWARD): string
