@@ -41,4 +41,13 @@ doctrine:
           retryDelay: 1000 # delay to try fetch from pool again(milliseconds) if no connect available
 ```
 
+Add Bundle to the `bundles.php`:
+
+```php
+[
+    SwooleDoctrineDbalPoolBundle::class => ['all' => true],
+]
+
+```
+
 It's all.
