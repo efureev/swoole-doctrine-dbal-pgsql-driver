@@ -95,7 +95,14 @@ class Result implements ResultInterface
             throw DriverException::fromConnection($this->connection);
         }
 
-        return $this->stmt->affectedRows();
+        /** @var int|false $res */
+        $res = $this->stmt->affectedRows();
+
+        if ($res === false) {
+            throw DriverException::fromConnection($this->connection);
+        }
+
+        return $res;
     }
 
     /** {@inheritdoc} */
