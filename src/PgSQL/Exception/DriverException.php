@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Swoole\Packages\Doctrine\DBAL\PgSQL\Exception;
 
+use Doctrine\DBAL\Driver\AbstractException;
 use Doctrine\DBAL\Driver\Exception as DBALDriverException;
-use Doctrine\DBAL\Exception;
 use Throwable;
 
 /** @psalm-immutable */
-class DriverException extends Exception implements DBALDriverException
+class DriverException extends AbstractException implements DBALDriverException
 {
     use ExceptionFromConnectionTrait;
 
@@ -20,7 +20,7 @@ class DriverException extends Exception implements DBALDriverException
         int $code = 0,
         ?Throwable $previous = null
     ) {
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message, $sqlState, $code, $previous);
     }
 
     public function getErrorCode(): ?string

@@ -18,7 +18,7 @@ class Result implements ResultInterface
     }
 
     /** {@inheritdoc} */
-    public function fetchNumeric(): array|bool
+    public function fetchNumeric(): array|false
     {
         if ($this->stmt === null) {
             throw DriverException::fromConnection($this->connection);
@@ -28,7 +28,7 @@ class Result implements ResultInterface
     }
 
     /** {@inheritdoc} */
-    public function fetchAssociative(): array|bool
+    public function fetchAssociative(): array|false
     {
         if ($this->stmt === null) {
             throw DriverException::fromConnection($this->connection);

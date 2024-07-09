@@ -6,6 +6,7 @@ namespace Swoole\Packages\Doctrine\DBAL\PgSQL;
 
 use Closure;
 use Doctrine\DBAL\Driver\Connection as ConnectionInterface;
+use Doctrine\DBAL\Driver\Exception;
 use Doctrine\DBAL\ParameterType;
 use Swoole\Coroutine\PostgreSQL;
 use Swoole\Packages\Doctrine\DBAL\PgSQL\Exception\ConnectionException;
@@ -116,7 +117,7 @@ class ConnectionDirect implements ConnectionInterface
      *
      * @param string|null $name
      */
-    public function lastInsertId($name = null): false|int|string
+    public function lastInsertId($name = null): int|string
     {
         $stmt = !empty($name)
             ? $this->query("SELECT CURRVAL('$name')")
@@ -126,38 +127,40 @@ class ConnectionDirect implements ConnectionInterface
             return (string)$result;
         }
 
-        return false;
+        throw new DriverException('Failed to retrieve the last insert ID');
     }
 
 
     /**
      * {@inheritdoc}
      */
-    public function beginTransaction(): bool
+    public function beginTransaction(): void
     {
         $this->getNativeConnection()->query('START TRANSACTION');
-
-        return true;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function commit(): bool
+    public function commit(): void
     {
         $stmt = $this->getNativeConnection()->query('COMMIT');
 
-        return !($stmt === false);
+        if ($stmt === false) {
+            throw new DriverException('Failed to commit the transaction');
+        }
     }
 
     /**
      * {@inheritdoc}
      */
-    public function rollBack(): bool
+    public function rollBack(): void
     {
         $stmt = $this->getNativeConnection()->query('ROLLBACK');
 
-        return !($stmt === false);
+        if ($stmt === false) {
+            throw new DriverException('Failed to rollback the transaction');
+        }
     }
 
     public function errorCode(): int
@@ -191,5 +194,22 @@ class ConnectionDirect implements ConnectionInterface
         if ($affectedRows !== 1) {
             throw new PingException();
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @throws Exception
+     */
+    public function getServerVersion(): string
+    {
+        $stmt = $this->query('SHOW server_version');
+        $result = $stmt->fetchOne();
+
+        if (is_string($result)) {
+            return $result;
+        }
+
+        throw new DriverException('Failed to retrieve the server version');
     }
 }
