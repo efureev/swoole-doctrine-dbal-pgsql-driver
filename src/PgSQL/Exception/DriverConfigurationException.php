@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Swoole\Packages\Doctrine\DBAL\PgSQL\Exception;
 
-use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Driver\AbstractException;
 
-class DriverConfigurationException extends Exception
+/** @psalm-immutable */
+class DriverConfigurationException extends AbstractException
 {
     public function __construct(string $message)
     {

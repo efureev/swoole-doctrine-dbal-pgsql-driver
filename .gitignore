@@ -7,6 +7,7 @@ composer.lock
 /.idea
 /storage
 /vendor
+/data/cache/psalm/
 clover.xml
 
 /.git-hooks
