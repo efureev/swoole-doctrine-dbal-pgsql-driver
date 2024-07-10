@@ -24,6 +24,6 @@ class SwooleDoctrineDbalPoolBundle extends AbstractBundle
             ->register(DriverMiddleware::class)
             ->addMethodCall('setFactory', [new Reference(ConnectionPoolFactory::class)])
             ->addMethodCall('setKernel', [new Reference('kernel')])
-            ->addTag('doctrine.middleware');
+            ->addTag('doctrine.middleware', ['priority' => 100]);
     }
 }
