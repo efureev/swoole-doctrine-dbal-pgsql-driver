@@ -8,6 +8,8 @@ use Closure;
 use Doctrine\DBAL\Driver\Connection as ConnectionInterface;
 use Doctrine\DBAL\Driver\Exception;
 use Doctrine\DBAL\ParameterType;
+use Swoole\Coroutine as Co;
+use Swoole\Coroutine\Context;
 use Swoole\Coroutine\PostgreSQL;
 use Swoole\Packages\Doctrine\DBAL\PgSQL\Exception\ConnectionException;
 use Swoole\Packages\Doctrine\DBAL\PgSQL\Exception\DriverException;
@@ -177,10 +179,10 @@ class ConnectionDirect implements ConnectionInterface
     {
         $this->buildEmptyConnectionStats();
 
-//        if ($this->connectionFactory === null) {
-//            throw new DriverConfigurationException('Missing Connection factory in: ' . static::class);
-//        }
-        return ($this->connectionFactory)();
+        $context = $this->getContext();
+        $context[self::class] ??= ($this->connectionFactory)();
+
+        return $context[self::class];
     }
 
     /**
@@ -211,5 +213,21 @@ class ConnectionDirect implements ConnectionInterface
         }
 
         throw new DriverException('Failed to retrieve the server version');
+    }
+
+    /**
+     * @psalm-suppress MixedReturnTypeCoercion
+     *
+     * @throws ConnectionException
+     */
+    protected function getContext(): Context
+    {
+        $context = Co::getContext(Co::getCid());
+
+        if ($context === null) {
+            throw new ConnectionException('Connection Co::Context unavailable');
+        }
+
+        return $context;
     }
 }

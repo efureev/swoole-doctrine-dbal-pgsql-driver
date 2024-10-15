@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Swoole\Packages\Doctrine\DBAL\PgSQL;
 
 use Doctrine\DBAL\Exception as DBALException;
-use Swoole\Coroutine as Co;
-use Swoole\Coroutine\Context;
 use Swoole\Coroutine\PostgreSQL;
 use Swoole\Packages\Doctrine\DBAL\PgSQL\Exception\ConnectionException;
 use Swoole\Packages\Doctrine\DBAL\PgSQL\Exception\DriverException;
@@ -110,22 +108,6 @@ final class Connection extends ConnectionDirect
         [, $stats] = $this->getContext()[self::class] ?? [null, null];
 
         return $stats;
-    }
-
-    /**
-     * @psalm-suppress MixedReturnTypeCoercion
-     * @return Context
-     * @throws ConnectionException
-     */
-    private function getContext(): Context
-    {
-        $context = Co::getContext(Co::getCid());
-
-        if ($context === null) {
-            throw new ConnectionException('Connection Co::Context unavailable');
-        }
-
-        return $context;
     }
 
     /**
