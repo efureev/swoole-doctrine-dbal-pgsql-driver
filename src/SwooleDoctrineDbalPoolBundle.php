@@ -6,6 +6,7 @@ namespace Swoole\Packages\Doctrine\DBAL;
 
 use Swoole\Packages\Doctrine\DBAL\PgSQL\ConnectionPoolFactory;
 use Swoole\Packages\Doctrine\DBAL\PgSQL\DriverMiddleware;
+use Swoole\Packages\Doctrine\DBAL\Symfony\ConnectionClosePass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
@@ -25,5 +26,7 @@ class SwooleDoctrineDbalPoolBundle extends AbstractBundle
             ->addMethodCall('setFactory', [new Reference(ConnectionPoolFactory::class)])
             ->addMethodCall('setKernel', [new Reference('kernel')])
             ->addTag('doctrine.middleware', ['priority' => 100]);
+
+        $container->addCompilerPass(new ConnectionClosePass());
     }
 }
