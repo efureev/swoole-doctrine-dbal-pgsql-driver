@@ -26,7 +26,8 @@
     "squizlabs/php_codesniffer": "^3.7.2",
     "vimeo/psalm": "^6.3.0",
     "weirdan/doctrine-psalm-plugin": "^2.10",
-    "symfony/dependency-injection": "^7.1"
+    "symfony/dependency-injection": "^7.1",
+    "swoole/ide-helper": "^5.0|^6.0"
   },
   "minimum-stability": "stable",
   "prefer-stable": true,
