@@ -10,7 +10,7 @@ use Swoole\Packages\Doctrine\DBAL\PgSQL\Exception\DriverConfigurationException;
 
 class ConnectionPoolFactory implements ConnectionPoolFactoryInterface
 {
-    public function __construct(private ?EventDispatcherInterface $dispatcher = null)
+    public function __construct(private EventDispatcherInterface $dispatcher)
     {
     }
 
@@ -30,6 +30,6 @@ class ConnectionPoolFactory implements ConnectionPoolFactoryInterface
 
     public function getEventDispatcher(): EventDispatcherInterface
     {
-        return $this->em;
+        return $this->dispatcher;
     }
 }
