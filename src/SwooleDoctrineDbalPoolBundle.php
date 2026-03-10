@@ -13,7 +13,7 @@ use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 class SwooleDoctrineDbalPoolBundle extends AbstractBundle
 {
-    public function build(ContainerBuilder $container)
+    public function build(ContainerBuilder $container): void
     {
         parent::build($container);
 
