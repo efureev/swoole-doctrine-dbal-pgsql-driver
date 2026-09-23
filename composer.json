@@ -84,9 +84,9 @@
             "@psalm",
             "@test-unit"
         ],
-        "cs": "phpcs",
-        "cs-fix": "phpcbf",
-        "psalm": "psalm --no-cache",
+        "cs": "phpcs --standard=phpcs.xml",
+        "cs-fix": "phpcbf --standard=phpcs.xml",
+        "psalm": "psalm -c psalm.xml --no-cache",
         "test": "phpunit",
         "test-unit": "phpunit --testsuite=unit",
         "test-integration": "phpunit --testsuite=integration",
