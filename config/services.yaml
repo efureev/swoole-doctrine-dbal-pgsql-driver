@@ -1,0 +1,43 @@
+services:
+  # Один реестр пулов на воркер: логгер и диспетчер событий подключаются, если есть.
+  SwooleDoctrinePool\Pool\PoolRegistry:
+    arguments:
+      $dispatcher: '@?event_dispatcher'
+      $logger: '@?logger'
+    tags:
+      - { name: monolog.logger, channel: swoole_pool }
+
+  SwooleDoctrinePool\Stats\PoolStatsProviderInterface:
+    class: SwooleDoctrinePool\Stats\RegistryStatsProvider
+    arguments:
+      $registry: '@SwooleDoctrinePool\Pool\PoolRegistry'
+
+  # Отдаёт lease раньше defer: после всех terminate-слушателей, которые ещё могут ходить в БД.
+  SwooleDoctrinePool\Bridge\Symfony\EventListener\ReleaseLeaseListener:
+    arguments:
+      $registry: '@SwooleDoctrinePool\Pool\PoolRegistry'
+    tags:
+      - { name: kernel.event_listener, event: kernel.terminate, method: onTerminate, priority: -1024 }
+      - { name: kernel.event_listener, event: console.terminate, method: onConsoleTerminate, priority: -1024 }
+
+  # События swoole-runtime-bundle по строковым именам: без него слушатели никогда не вызываются.
+  # worker_exit — drain (воркер ещё дообслуживает запросы), worker_stop — полное закрытие.
+  SwooleDoctrinePool\Bridge\Symfony\EventListener\ClosePoolsListener:
+    arguments:
+      $registry: '@SwooleDoctrinePool\Pool\PoolRegistry'
+      $logger: '@?logger'
+    tags:
+      - { name: monolog.logger, channel: swoole_pool }
+      - { name: kernel.event_listener, event: swoole.worker_exit, method: onExit }
+      - { name: kernel.event_listener, event: swoole.worker_stop, method: onStop }
+      - { name: kernel.event_listener, event: swoole.before_shutdown, method: onStop }
+
+  SwooleDoctrinePool\Bridge\Symfony\EventListener\WarmUpListener:
+    arguments:
+      $doctrine: '@?doctrine'
+      $registry: '@SwooleDoctrinePool\Pool\PoolRegistry'
+      $connectionNames: '%swoole_doctrine_pool.connection_names%'
+      $logger: '@?logger'
+    tags:
+      - { name: monolog.logger, channel: swoole_pool }
+      - { name: kernel.event_listener, event: swoole.worker_start, method: onWorkerStart }

@@ -1,0 +1,18 @@
+framework:
+  secret: test
+  test: true
+  http_method_override: false
+  handle_all_throwables: true
+  php_errors:
+    log: true
+
+doctrine:
+  dbal:
+    connections:
+      default:
+        driver: pdo_pgsql
+        server_version: '17'
+
+swoole_doctrine_pool:
+  connections:
+    typo: ~

@@ -1,0 +1,26 @@
+framework:
+  secret: test
+  test: true
+  http_method_override: false
+  handle_all_throwables: true
+  php_errors:
+    log: true
+
+# url: — путь, на котором DoctrineBundle выбрасывает driverClass; пул обязан подставить middleware.
+doctrine:
+  dbal:
+    connections:
+      default:
+        url: '%env(resolve:POOL_TEST_DSN)%'
+        server_version: '17'
+        idle_connection_ttl: 0
+
+swoole_doctrine_pool:
+  connections:
+    default:
+      size: 2
+
+services:
+  test.pool_registry:
+    alias: SwooleDoctrinePool\Pool\PoolRegistry
+    public: true

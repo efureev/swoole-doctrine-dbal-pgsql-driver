@@ -1,17 +1,19 @@
-.php_cs.cache
+.idea
 .DS_Store
-.phpunit.result.cache
 
+/vendor/
 composer.lock
 
-/.idea
-/storage
-/vendor
-/data/cache/psalm/
-clover.xml
+###> squizlabs/php_codesniffer ###
+/.phpcs-cache
+###< squizlabs/php_codesniffer ###
 
-/.git-hooks
+###> vimeo/psalm ###
+/.psalm-cache/
+###< vimeo/psalm ###
 
-summary.log
-per-mutator.md
-infection.log
+###> phpunit/phpunit ###
+/.phpunit.cache/
+/phpunit.xml
+/coverage/
+###< phpunit/phpunit ###

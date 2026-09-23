@@ -1,0 +1,11 @@
+/.editorconfig        export-ignore
+/.gitattributes       export-ignore
+/.github              export-ignore
+/.gitignore           export-ignore
+/compose.yaml         export-ignore
+/docs                 export-ignore
+/phpcs.xml            export-ignore
+/phpunit.xml.dist     export-ignore
+/psalm.xml            export-ignore
+/tests                export-ignore
+/tools                export-ignore

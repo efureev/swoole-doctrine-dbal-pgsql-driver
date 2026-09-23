@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main, v3]
+  pull_request:
+
+jobs:
+  quality:
+    name: phpcs + psalm + unit (без ext-swoole)
+    runs-on: ubuntu-latest
+    container: php:8.5-cli
+    env:
+      COMPOSER_ALLOW_SUPERUSER: '1'
+      COMPOSER_NO_INTERACTION: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install git/unzip for composer
+        run: apt-get update && apt-get install -y --no-install-recommends git unzip && rm -rf /var/lib/apt/lists/*
+      - name: Install composer
+        run: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+      - uses: actions/cache@v4
+        with:
+          path: vendor
+          key: quality-${{ hashFiles('composer.json') }}
+      - run: composer install --no-progress --prefer-dist --ignore-platform-req=ext-swoole
+      - run: composer ci
+
+  integration:
+    name: integration (${{ matrix.image }})
+    needs: quality
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # ZTS — рабочая сборка Swoole в проде; NTS проверяется дополнительно.
+        image:
+          - 'phpswoole/swoole:6.2.3-php8.5-zts'
+          - 'phpswoole/swoole:6.2.3-php8.5'
+    container:
+      image: ${{ matrix.image }}
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: pool
+          POSTGRES_PASSWORD: pool
+          POSTGRES_DB: pool
+        options: >-
+          --health-cmd "pg_isready -U pool -d pool"
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 15
+    env:
+      POOL_TEST_DSN: 'pgsql://pool:pool@postgres:5432/pool'
+      COMPOSER_ALLOW_SUPERUSER: '1'
+      COMPOSER_NO_INTERACTION: '1'
+    steps:
+      - name: Install git/unzip for checkout and composer
+        run: apt-get update && apt-get install -y --no-install-recommends git unzip && rm -rf /var/lib/apt/lists/*
+      - uses: actions/checkout@v4
+      - run: sh tests/Integration/docker/prepare.sh
+      - name: Install composer
+        run: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+      - uses: actions/cache@v4
+        with:
+          path: vendor
+          key: integration-${{ hashFiles('composer.json') }}
+      - run: composer install --no-progress --prefer-dist
+      - run: composer test-integration

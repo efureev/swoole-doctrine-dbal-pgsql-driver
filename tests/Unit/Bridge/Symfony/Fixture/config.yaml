@@ -1,0 +1,30 @@
+framework:
+  secret: test
+  test: true
+  http_method_override: false
+  handle_all_throwables: true
+  php_errors:
+    log: true
+
+doctrine:
+  dbal:
+    connections:
+      default:
+        driver: pdo_pgsql
+        host: '127.0.0.1'
+        dbname: app
+        user: app
+        password: secret
+        server_version: '17'
+        idle_connection_ttl: 0
+      other:
+        driver: pdo_pgsql
+        host: '127.0.0.1'
+        dbname: other
+        server_version: '17'
+
+swoole_doctrine_pool:
+  connections:
+    default:
+      size: '%env(int:POOL_SIZE)%'
+      reset_on_release: rollback_only
