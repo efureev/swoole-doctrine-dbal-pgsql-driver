@@ -24,7 +24,11 @@ jobs:
           path: vendor
           key: quality-${{ hashFiles('composer.json') }}
       - run: composer install --no-progress --prefer-dist --ignore-platform-req=ext-swoole
-      - run: composer ci
+      - name: Workspace check
+        run: pwd && ls -la && ls -la phpcs.xml psalm.xml phpunit.xml.dist
+      - run: vendor/bin/phpcs --standard=phpcs.xml
+      - run: vendor/bin/psalm -c psalm.xml --no-cache
+      - run: vendor/bin/phpunit --testsuite=unit
 
   integration:
     name: integration (${{ matrix.image }})
