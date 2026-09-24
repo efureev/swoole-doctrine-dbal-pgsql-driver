@@ -1,0 +1,40 @@
+framework:
+  secret: test
+  test: true
+  http_method_override: false
+  handle_all_throwables: true
+  php_errors:
+    log: true
+
+doctrine:
+  dbal:
+    connections:
+      default:
+        url: '%env(resolve:POOL_TEST_DSN)%'
+        server_version: '17'
+        idle_connection_ttl: 0
+        application_name: swoole-doctrine-pool-symfony
+  orm:
+    enable_native_lazy_objects: true
+    entity_managers:
+      default:
+        mappings:
+          Fixture:
+            type: attribute
+            is_bundle: false
+            dir: '%test.fixtures_dir%'
+            prefix: 'SwooleDoctrinePool\Tests\Integration\Fixture'
+
+swoole_doctrine_pool:
+  connections:
+    default:
+      size: 5
+      acquire_timeout: 0.5
+
+services:
+  test.pool_registry:
+    alias: SwooleDoctrinePool\Pool\PoolRegistry
+    public: true
+  test.orm_config:
+    alias: doctrine.orm.default_configuration
+    public: true

@@ -1,54 +1,109 @@
 {
-  "name": "efureev/swoole-doctrine-dbal-pgsql-driver",
-  "description": "The Postgres Swoole 5 driver for Doctrine",
-  "license": "MIT",
-  "keywords": [
-    "symfony",
-    "swoole",
-    "docrtine",
-    "dbal"
-  ],
-  "authors": [
-    {
-      "name": "Fureev Eugene",
-      "email": "fureev@gmail.com"
-    }
-  ],
-  "require": {
-    "php": "^8.2",
-    "doctrine/dbal": "^4.0",
-    "symfony/contracts": "^3.2",
-    "symfony/http-kernel": "^7.1 || ^8.0"
-  },
-  "require-dev": {
-    "ergebnis/composer-normalize": "^2.50.0",
-    "roave/security-advisories": "dev-latest",
-    "squizlabs/php_codesniffer": "^3.13.5",
-    "swoole/ide-helper": "^5.0 || ^6.0",
-    "symfony/dependency-injection": "^7.1 || ^8.0",
-    "vimeo/psalm": "^6.15.1",
-    "weirdan/doctrine-psalm-plugin": "^2.10"
-  },
-  "minimum-stability": "stable",
-  "prefer-stable": true,
-  "autoload": {
-    "psr-4": {
-      "Swoole\\Packages\\Doctrine\\DBAL\\": "src/"
-    }
-  },
-  "config": {
-    "allow-plugins": {
-      "ergebnis/composer-normalize": true
+    "name": "efureev/swoole-doctrine-dbal-pgsql-driver",
+    "description": "Coroutine-safe PostgreSQL connection pool for Doctrine DBAL on Swoole (hooked pdo_pgsql) with an optional Symfony bundle",
+    "license": "MIT",
+    "type": "library",
+    "keywords": [
+        "swoole",
+        "doctrine",
+        "dbal",
+        "postgresql",
+        "pgsql",
+        "connection-pool",
+        "coroutine",
+        "symfony"
+    ],
+    "authors": [
+        {
+            "name": "Fureev Eugene",
+            "email": "fureev@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.5",
+        "ext-pdo": "*",
+        "ext-swoole": ">=6.2",
+        "doctrine/dbal": "^4.4",
+        "psr/event-dispatcher": "^1.0",
+        "psr/log": "^3.0"
     },
-    "optimize-autoloader": true,
-    "preferred-install": {
-      "*": "dist"
+    "require-dev": {
+        "doctrine/doctrine-bundle": "^3.0",
+        "doctrine/orm": "^3.7",
+        "phpunit/phpunit": "^13.0",
+        "psalm/plugin-symfony": "^5.3",
+        "squizlabs/php_codesniffer": "^4.0",
+        "swoole/ide-helper": "^6.2",
+        "symfony/config": "^8.1",
+        "symfony/console": "^8.1",
+        "symfony/dependency-injection": "^8.1",
+        "symfony/event-dispatcher": "^8.1",
+        "symfony/framework-bundle": "^8.1",
+        "symfony/http-kernel": "^8.1",
+        "symfony/yaml": "^8.1",
+        "vimeo/psalm": "^6.15"
     },
-    "sort-packages": true
-  },
-  "scripts": {
-    "cs-check": "phpcs",
-    "cs-fix": "phpcbf",
-    "psalm": "./vendor/bin/psalm"
-  }
+    "conflict": {
+        "doctrine/doctrine-bundle": "<3.0",
+        "symfony/config": "<8.1",
+        "symfony/dependency-injection": "<8.1",
+        "symfony/event-dispatcher": "<8.1",
+        "symfony/http-kernel": "<8.1"
+    },
+    "suggest": {
+        "doctrine/doctrine-bundle": "Symfony-интеграция: SwooleDoctrinePool\\Bridge\\Symfony\\SwooleDoctrinePoolBundle переводит DBAL-соединения DoctrineBundle 3.x на пул",
+        "symfony/framework-bundle": "Нужен для регистрации бандла (Symfony >= 8.1)",
+        "symfony/monolog-bundle": "Канал логов swoole_pool"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "SwooleDoctrinePool\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SwooleDoctrinePool\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "symfony/runtime": false
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "3.0-dev"
+        }
+    },
+    "scripts": {
+        "ci": [
+            "@cs",
+            "@psalm",
+            "@test-unit"
+        ],
+        "cs": "phpcs --standard=phpcs.xml",
+        "cs-fix": "phpcbf --standard=phpcs.xml",
+        "psalm": "psalm -c psalm.xml --no-cache",
+        "test": "phpunit",
+        "test-unit": "phpunit --testsuite=unit",
+        "test-integration": "phpunit --testsuite=integration",
+        "integration": "tests/Integration/run.sh",
+        "up": "docker compose up -d --wait postgres",
+        "down": "docker compose down --remove-orphans"
+    },
+    "scripts-descriptions": {
+        "ci": "Полный набор проверок, как в CI: phpcs, psalm, юнит-тесты",
+        "cs": "Проверка стиля кода (PSR-12 + правила phpcs.xml)",
+        "cs-fix": "Автоисправление стиля кода",
+        "psalm": "Статический анализ (без ext-swoole, на стабах swoole/ide-helper)",
+        "test": "Все наборы; integration скипается без ext-swoole и POOL_TEST_DSN",
+        "test-unit": "Юнит-тесты, работают без ext-swoole и без Postgres",
+        "test-integration": "Интеграционные тесты; нужны ext-swoole и POOL_TEST_DSN",
+        "integration": "Интеграционные тесты в docker на всей матрице образов",
+        "up": "Поднять Postgres 17 для интеграционных тестов (порт 5433)",
+        "down": "Погасить Postgres"
+    }
 }

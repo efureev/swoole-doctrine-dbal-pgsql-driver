@@ -1,0 +1,51 @@
+# Локальное окружение интеграционных тестов. Контракт тот же, что в CI: Postgres 17 как сервис,
+# адрес — в POOL_TEST_DSN. Без POOL_TEST_DSN интеграционные тесты скипаются, а не падают.
+#
+#   composer up              # только postgres (порт 5433, чтобы не конфликтовать с локальным)
+#   composer integration     # матрица образов Swoole, tests/Integration/run.sh
+#   composer down
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: pool
+      POSTGRES_PASSWORD: pool
+      POSTGRES_DB: pool
+    # Данные не нужны: каждый тест-класс работает в своей схеме и удаляет её.
+    command:
+      - postgres
+      - -c
+      - max_connections=300
+      - -c
+      - fsync=off
+      - -c
+      - synchronous_commit=off
+      - -c
+      - full_page_writes=off
+    tmpfs:
+      - /var/lib/postgresql/data
+    ports:
+      - '5433:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U pool -d pool']
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+  app:
+    profiles: ['integration']
+    build:
+      context: tests/Integration/docker
+      args:
+        BASE_IMAGE: '${BASE_IMAGE:-phpswoole/swoole:6.2.3-php8.5-zts}'
+    image: 'swoole-doctrine-pool-integration:${BASE_TAG:-default}'
+    working_dir: /app
+    volumes:
+      - '.:/app'
+    environment:
+      POOL_TEST_DSN: 'pgsql://pool:pool@postgres:5432/pool'
+      COMPOSER_ALLOW_SUPERUSER: '1'
+      COMPOSER_NO_INTERACTION: '1'
+    depends_on:
+      postgres:
+        condition: service_healthy

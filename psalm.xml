@@ -1,21 +1,83 @@
 <?xml version="1.0"?>
 <psalm
-        errorLevel="1"
-        resolveFromConfigFile="true"
-        cacheDirectory="data/cache/psalm"
-        hideExternalErrors="true"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns="https://getpsalm.org/schema/config"
-        xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
-        xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+    errorLevel="4"
+    resolveFromConfigFile="true"
+    useDocblockTypes="true"
+    useDocblockPropertyTypes="true"
+    strictBinaryOperands="true"
+    addParamDefaultToDocblockType="true"
+    findUnusedVariablesAndParams="true"
+    findUnusedBaselineEntry="true"
+    findUnusedCode="false"
+    ensureArrayStringOffsetsExist="true"
+    hideExternalErrors="true"
 >
-    <projectFiles>
-        <directory name="src"/>
-        <ignoreFiles>
-            <directory name="vendor"/>
-        </ignoreFiles>
-    </projectFiles>
-    <plugins>
-        <pluginClass class="Weirdan\DoctrinePsalmPlugin\Plugin"/>
-    </plugins>
+  <projectFiles>
+    <directory name="src"/>
+    <directory name="tests"/>
+    <ignoreFiles>
+      <directory name="vendor"/>
+    </ignoreFiles>
+  </projectFiles>
+
+  <!--
+    Swoole — C-расширение: без стабов каждый Swoole\* — неизвестный класс, и анализ корутинного
+    слоя бесполезен. swoole/ide-helper даёт сигнатуры, поэтому CI анализирует пакет на голом PHP.
+  -->
+  <stubs>
+    <file name="tools/psalm-stubs.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/constants.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/functions.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole_library/src/core/Constant.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole_library/src/core/Coroutine/WaitGroup.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/Swoole/Coroutine.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/Swoole/Coroutine/CanceledException.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/Swoole/Coroutine/Channel.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/Swoole/Coroutine/Context.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/Swoole/Coroutine/Scheduler.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/Swoole/Coroutine/System.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/Swoole/Coroutine/TimeoutException.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/Swoole/Error.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/Swoole/Event.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/Swoole/Exception.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/Swoole/ExitException.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/Swoole/Http/Request.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/Swoole/Http/Response.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/Swoole/Http/Server.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/Swoole/Process.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/Swoole/Runtime.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/Swoole/Server.php"/>
+    <file name="vendor/swoole/ide-helper/src/swoole/Swoole/Timer.php"/>
+  </stubs>
+
+  <plugins>
+    <pluginClass class="Psalm\SymfonyPsalmPlugin\Plugin"/>
+  </plugins>
+
+  <issueHandlers>
+    <!-- Фейки в тестах строят Driver\PDO\Exception так же, как настоящий PDO-драйвер DBAL. -->
+    <InternalClass>
+      <errorLevel type="suppress">
+        <directory name="tests"/>
+      </errorLevel>
+    </InternalClass>
+    <InternalMethod>
+      <errorLevel type="suppress">
+        <directory name="tests"/>
+      </errorLevel>
+    </InternalMethod>
+    <!--
+      psalm считает метод из трейта унаследованным и требует #[Override]; для PHP это compile error.
+      Единственный такой файл — фикстурное ядро с MicroKernelTrait.
+    -->
+    <MissingOverrideAttribute>
+      <errorLevel type="suppress">
+        <directory name="tests/Unit/Bridge/Symfony/Fixture"/>
+      </errorLevel>
+    </MissingOverrideAttribute>
+  </issueHandlers>
+
 </psalm>

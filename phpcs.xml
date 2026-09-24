@@ -1,16 +1,86 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
+
 <ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd">
 
-    <arg name="basepath" value="."/>
-    <arg name="cache" value=".phpcs-cache"/>
-    <arg name="colors"/>
-    <arg name="extensions" value="php"/>
-    <arg name="parallel" value="10"/>
+  <arg name="basepath" value="."/>
+  <arg name="cache" value=".phpcs-cache"/>
+  <arg name="colors"/>
+  <arg name="extensions" value="php"/>
 
-    <!-- Show progress -->
-    <arg value="p"/>
+  <rule ref="PSR12"/>
 
-    <!-- Paths to check -->
-    <file>src</file>
+  <file>config/</file>
+  <file>src/</file>
+  <file>tools/</file>
+
+  <exclude-pattern>vendor</exclude-pattern>
+
+  <rule ref="Squiz.Arrays.ArrayBracketSpacing"/>
+  <rule ref="Squiz.ControlStructures.ControlSignature"/>
+  <rule ref="Squiz.Functions.FunctionDeclarationArgumentSpacing"/>
+  <rule ref="Squiz.Scope.MethodScope"/>
+  <rule ref="Squiz.WhiteSpace.ControlStructureSpacing"/>
+
+  <rule ref="Squiz.Strings.ConcatenationSpacing">
+    <properties>
+      <property name="spacing" value="1"/>
+      <property name="ignoreNewlines" value="true"/>
+    </properties>
+  </rule>
+
+  <rule ref="Generic.ControlStructures.DisallowYodaConditions"/>
+  <rule ref="Generic.NamingConventions.ConstructorName"/>
+  <rule ref="Generic.PHP.DeprecatedFunctions"/>
+  <rule ref="Generic.PHP.LowerCaseKeyword"/>
+  <!-- Многострочная конкатенация — способ уложить длинные сообщения в 120 колонок. -->
+  <rule ref="Generic.Strings.UnnecessaryStringConcat">
+    <properties>
+      <property name="allowMultiline" value="true"/>
+    </properties>
+  </rule>
+  <rule ref="Generic.ControlStructures.InlineControlStructure">
+    <properties>
+      <property name="error" value="true"/>
+    </properties>
+  </rule>
+
+  <rule ref="Squiz.Arrays.ArrayDeclaration.KeyNotAligned">
+    <severity>0</severity>
+  </rule>
+  <rule ref="Squiz.Arrays.ArrayDeclaration.ValueNotAligned">
+    <severity>0</severity>
+  </rule>
+  <rule ref="Squiz.Arrays.ArrayDeclaration.CloseBraceNotAligned">
+    <severity>0</severity>
+  </rule>
+  <rule ref="Squiz.Arrays.ArrayDeclaration.CloseBraceNewLine">
+    <severity>0</severity>
+  </rule>
+
+  <rule ref="Squiz.NamingConventions.ValidVariableName"/>
+  <rule ref="Squiz.NamingConventions.ValidVariableName.PrivateNoUnderscore">
+    <severity>0</severity>
+  </rule>
+
+  <rule ref="Generic.Arrays.ArrayIndent"/>
+
+  <rule ref="Generic.PHP.ForbiddenFunctions">
+    <properties>
+      <property name="forbiddenFunctions" type="array">
+        <element key="sizeof" value="count"/>
+        <element key="delete" value="unset"/>
+        <element key="print" value="echo"/>
+        <element key="is_null" value="null"/>
+        <element key="create_function" value="null"/>
+      </property>
+    </properties>
+  </rule>
+
+  <rule ref="PSR2.Methods.MethodDeclaration.Underscore">
+    <type>error</type>
+  </rule>
+  <rule ref="PSR2.Classes.PropertyDeclaration.Underscore">
+    <type>error</type>
+  </rule>
 </ruleset>
